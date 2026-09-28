@@ -1,5 +1,8 @@
 # Native performance and validation
 
+For the repeated MacBook versus Ryzen 9950X / RTX 5090 host comparison, see
+[Hardware benchmark](HARDWARE_BENCHMARK.md).
+
 ## Parallel rollout optimization (2026-09-28)
 
 On the same development Mac, using the unchanged native binary and complete
