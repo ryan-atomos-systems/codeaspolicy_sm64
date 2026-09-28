@@ -1,13 +1,27 @@
-sm64-AI
-models
-wandb
-runs
-rayshit
-__pycache__
-recorded_images/*.png
-# don't upload any models except the default hider and seeker
-trained_models
-!trained_models/agentHider.pt
-!trained_models/agentSeeker.pt
-graphs/old_graphs
-graphs/curiosity/*.png
+# Local runtime data and copyrighted game assets
+/artifacts/
+*.z64
+*.v64
+*.n64
+*.sav
+sm64_save_file.bin
+
+# Python and editors
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ruff_cache/
+.DS_Store
+
+# Historical experiment outputs
+/legacy/models/
+/legacy/wandb/
+/legacy/runs/
+/legacy/rayshit/
+/legacy/recorded_images/*.png
+/legacy/trained_models/*
+!/legacy/trained_models/agentHider.pt
+!/legacy/trained_models/agentSeeker.pt
+/legacy/graphs/old_graphs/
+/legacy/graphs/curiosity/*.png

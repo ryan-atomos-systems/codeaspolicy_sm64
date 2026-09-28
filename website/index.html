@@ -1,0 +1,160 @@
+<!doctype html>
+<!-- Adapted from the Nerfies project-page template, CC BY-SA 4.0. See LICENSE.md. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GPT-6 Astra develops an executable policy for Super Mario 64: eight stars and the first Bowser key from an empty save. Watch the run and inspect a decision in 3D.">
+  <meta name="theme-color" content="#ffffff">
+  <meta property="og:title" content="Code as Policy in Super Mario 64">
+  <meta property="og:description" content="From an empty save to eight stars and the first Bowser key. GPT-6 Astra as the development agent; Python as the policy.">
+  <meta property="og:type" content="website">
+  <title>Code as Policy in Super Mario 64</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#overview">Skip to the project</a>
+  <nav class="site-nav" aria-label="Sections">
+    <a class="wordmark" href="#top">SM64 <span>Policy Lab</span></a>
+    <div><a href="#rollout">Rollout</a><a href="#method">Method</a><a href="#decision">Explore a decision</a><a href="#results">Results</a></div>
+  </nav>
+  <main id="top">
+    <noscript><p class="prose">The recording and article work without JavaScript. Chapter controls and the interactive state viewer require JavaScript.</p></noscript>
+    <section class="hero">
+      <div class="hero-body container has-text-centered">
+        <p class="publication-venue">An experiment in embodied control · September 2026</p>
+        <h1 class="publication-title"><span>Code as Policy</span><br>in Super Mario 64</h1>
+        <p class="publication-authors"><strong>GPT-6 Astra</strong> <span>Development agent</span></p>
+        <p class="affiliation">SM64 Policy Lab · Human-directed development</p>
+        <p class="hero-summary">From an empty save to eight stars<br class="wide-break"> and the first Bowser key.</p>
+        <div class="publication-links">
+          <a class="button dark" href="paper.tex" download><span aria-hidden="true">↗</span> Paper (LaTeX)</a>
+          <a class="button dark" href="code.html"><span aria-hidden="true">&lt;/&gt;</span> Policy code</a>
+          <a class="button" href="#rollout"><span aria-hidden="true">▷</span> Watch the run</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="rollout" class="teaser container" aria-label="Recorded campaign">
+      <figure class="rollout-figure">
+        <div class="video-shell">
+          <video id="rollout-video" controls playsinline muted preload="metadata" poster="media/poster.png" aria-label="Complete eight-star and first-Bowser campaign">
+            <source src="media/campaign.mp4" type="video/mp4">
+            Your browser cannot play this recording. <a href="media/campaign.mp4">Download the MP4.</a>
+          </video>
+          <span class="video-tag">Continuous run · empty save</span>
+        </div>
+        <figcaption class="video-caption">
+          <span>Eight stars, then Bowser. <span class="muted">Choose a chapter below.</span></span>
+          <label>Playback <select id="playback-rate" aria-label="Playback speed"><option value="1">1×</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option></select></label>
+        </figcaption>
+      </figure>
+      <div class="chapters" aria-label="Rollout chapters">
+        <button data-seek="0" class="active">Start</button>
+        <button data-seek="783">Chain Chomp</button>
+        <button data-seek="2922">Secret Slide</button>
+        <button data-seek="6732">Aquarium</button>
+        <button data-seek="10086">Whomp’s Fortress</button>
+        <button data-seek="20380">Dark World</button>
+        <button data-seek="24529">Bowser</button>
+        <button data-seek="26460">The key</button>
+      </div>
+      <p class="media-note" id="video-status">Recorded at 10 images/s. Playback starts at 4× game speed. No audio.</p>
+      <div class="results-strip" aria-label="Campaign measurements">
+        <div><strong>8</strong><span>unique stars</span></div>
+        <div><strong>0</strong><span>recorded deaths</span></div>
+        <div><strong>14:44.67</strong><span>game time to the key</span></div>
+      </div>
+    </section>
+
+    <section id="overview" class="section prose">
+      <h2>Overview</h2>
+      <p>We use GPT-6 Astra to develop a controller for Super Mario 64. Given a gameplay objective and access to the game’s source and state, the agent writes Python skills, tests them in the environment, and revises them from execution feedback. The resulting program collects eight stars and the first Bowser key in one continuous run from an empty save.</p>
+      <p>The policy combines a fixed campaign route with feedback control. It reads Mario’s motion, nearby objects, collision samples, and saved progress, then chooses a controller input every physics frame. The run uses oracle observations in a modified native PC port, with the opening cinematic skipped. Human direction sets the development goals; the deployed program runs without language-model calls or RL training.</p>
+    </section>
+
+    <section id="method" class="section method-section">
+      <div class="prose"><h2>From code to control</h2>
+        <p>The campaign is a hierarchy of small programs. A task controller selects the course and objective. Skills handle interactions such as boarding a platform or grabbing Bowser’s tail. Shared movement controllers convert target positions and current velocity into stick inputs.</p>
+      </div>
+      <figure class="method-figure container">
+        <div class="method-row"><div class="row-label">Development<span>GPT-6 Astra + human direction</span></div><div class="method-step">Inspect mechanics</div><span class="arrow" aria-hidden="true">→</span><div class="method-step">Write a skill</div><span class="arrow" aria-hidden="true">→</span><div class="method-step">Test and revise</div></div>
+        <div class="method-row execution"><div class="row-label">Execution<span>Python · every physics frame</span></div><div class="method-step">Observe state</div><span class="arrow" aria-hidden="true">→</span><div class="method-step">Select skill &amp; control</div><span class="arrow" aria-hidden="true">→</span><div class="method-step">Apply controller input</div></div>
+        <figcaption>Development produces the program. During a rollout, feedback passes through the program at every step.</figcaption>
+      </figure>
+      <div class="prose">
+        <p>Different movement modes need different controllers. On the ground, the policy steers toward a target heading. In an ordinary jump, Mario’s facing is locked, so the controller adjusts forward acceleration and lateral motion separately. Sliding, swimming, cannon aiming, and the Bowser fight each have their own skill.</p>
+        <p>Routes and thresholds are authored using the level source. Dynamic decisions use the current observation: wait for a platform to descend, line up over a post, or release Bowser when the spin speed and angle are sufficient. Replay checkpoints support development; the final campaign is rerun from the beginning.</p>
+      </div>
+    </section>
+
+    <section id="decision" class="section decision-section">
+      <div class="prose"><h2>Inside one decision</h2>
+        <p>To free Chain Chomp, Mario must ground-pound the post. The policy presses Z when he is airborne, within 32 units of the post’s center, and more than five units above its top. At input frame 1,466, all three conditions hold.</p>
+        <p class="interaction-hint">Step through the recording below. Drag the state view to orbit; click an object to inspect it.</p>
+      </div>
+      <div class="decision-demo container" aria-busy="true">
+        <div class="demo-timeline">
+          <button id="previous-decision" aria-label="Previous decision" disabled>←</button>
+          <label for="decision-frame">Outcome frame <output id="frame-number">1467</output></label>
+          <input id="decision-frame" type="range" min="1437" max="1491" value="1467" step="1" aria-label="Recorded decision frame" disabled>
+          <button id="next-decision" aria-label="Next decision" disabled>→</button>
+        </div>
+        <div class="demo-views">
+          <figure class="game-panel"><div class="panel-heading">Recorded game <span id="image-frame">F1467</span></div><img id="decision-image" src="media/decision/00001467.png" alt="Mario above the Chain Chomp post at recorded frame 1467" width="480" height="270" loading="lazy"><figcaption id="image-caption">Image F1467 · outcome F1467</figcaption></figure>
+          <div id="state-panel" class="state-panel">
+            <div class="panel-heading">Oracle state <button id="expand-state">Expand</button></div>
+            <div class="scene-wrap"><canvas id="oracle-canvas" tabindex="0" aria-label="Interactive 3D oracle state. Drag to orbit, or use arrow keys."></canvas><div id="scene-labels" aria-hidden="true"></div><p id="scene-fallback" hidden>3D rendering is unavailable. The recorded image and decision values remain available.</p></div>
+            <div class="view-controls"><button data-view="follow" aria-pressed="true">Follow</button><button data-view="top" aria-pressed="false">Top down</button><button data-view="orbit" aria-pressed="false">Orbit</button><label>Show <select id="state-basis"><option value="output">Outcome</option><option value="input">Policy input</option></select></label></div>
+          </div>
+        </div>
+        <div class="decision-readout" aria-live="polite">
+          <p id="decision-timing">Input F1466 → action → outcome F1467</p>
+          <div class="gate-grid"><div><span>Horizontal error</span><strong id="horizontal-error">28.77 <small>units</small></strong><span id="horizontal-gate" class="gate pass">&lt; 32 ✓</span></div><div><span>Height above post</span><strong id="height-error">46.62 <small>units</small></strong><span id="height-gate" class="gate pass">&gt; 5 ✓</span></div><div><span>Motion state</span><strong id="motion-state">Airborne</strong><span id="airborne-gate" class="gate pass">Required ✓</span></div><div class="action-result"><span>Chosen input</span><strong id="chosen-action">Z</strong><span id="chosen-stick">stick 0 / 0</span></div></div>
+        </div>
+        <p id="demo-status" class="media-note" role="status">Loading the recorded decision excerpt…</p>
+        <details class="scene-details"><summary>State layers and object inspector</summary><div class="layer-controls"><label><input type="checkbox" data-layer="mario" checked> Mario</label><label><input type="checkbox" data-layer="ghost" checked> Input ghost</label><label><input type="checkbox" data-layer="geometry" checked> Surfaces</label><label><input type="checkbox" data-layer="objects" checked> Objects</label><label><input type="checkbox" data-layer="hitboxes"> Hitboxes</label><label><input type="checkbox" data-layer="rays"> Rays</label><label><input type="checkbox" data-layer="camera"> Camera</label><label><input type="checkbox" data-layer="intent" checked> Target</label><label><input type="checkbox" data-layer="trail" checked> Trail</label><label><input type="checkbox" data-layer="grid" checked> Grid</label></div><p id="oracle-status"></p><p id="contact-badge"></p><p id="oracle-coverage"></p><div class="object-controls"><label for="object-picker">Observed object</label><select id="object-picker"></select><button id="focus-object">Focus</button></div><div id="object-inspector"></div></details>
+      </div>
+      <div class="prose"><p class="figure-caption">Recorded values from the successful campaign. Each action uses the preceding observation; the image is labeled with its actual frame. The scene contains observed objects and collision samples. The grid is a ruler, and unsampled geometry remains unknown.</p></div>
+      <div class="prose code-example"><h3>The branch that chose Z</h3><pre><code><span class="code-comment"># GroundPoundObject.act(), abbreviated</span>
+<span class="code-keyword">if</span> state.mario.airborne:
+    <span class="code-keyword">if</span> distance &lt; 32 <span class="code-keyword">and</span> feet_y &gt; post_top_y + 5:
+        <span class="code-keyword">return</span> Action(z=True)
+    <span class="code-keyword">return</span> air_steer(state, post_center)</code></pre><p class="figure-caption">The viewer displays the conditions logged during execution. The full controller also handles takeoff and the interval between jumps. <a href="code.html#control">Read the implementation →</a></p></div>
+    </section>
+
+    <section id="results" class="section prose">
+      <h2>Eight stars and the first key</h2>
+      <p>The route combines four courses, castle travel, Bowser in the Dark World, and the boss encounter. The evaluator checks saved progress independently of the policy: eight distinct star bits and the first-key flag, starting from an empty save.</p>
+      <div class="table-wrap"><table><caption>Collection times in the continuous run</caption><thead><tr><th scope="col">Star</th><th scope="col">Objective</th><th scope="col">Game time</th></tr></thead><tbody>
+        <tr><td>1</td><td>BOB · Behind Chain Chomp’s Gate</td><td><button class="time-link" data-seek="1769">0:58.97 ↗</button></td></tr>
+        <tr><td>2</td><td>Secret Slide · Under 21 seconds</td><td><button class="time-link" data-seek="4005">2:13.50 ↗</button></td></tr>
+        <tr><td>3</td><td>Secret Slide · Box star</td><td><button class="time-link" data-seek="5694">3:09.80 ↗</button></td></tr>
+        <tr><td>4</td><td>Secret Aquarium · Red coins</td><td><button class="time-link" data-seek="9105">5:03.50 ↗</button></td></tr>
+        <tr><td>5</td><td>WF · Chip Off Whomp’s Block</td><td><button class="time-link" data-seek="12892">7:09.73 ↗</button></td></tr>
+        <tr><td>6</td><td>WF · To the Top of the Fortress</td><td><button class="time-link" data-seek="16246">9:01.53 ↗</button></td></tr>
+        <tr><td>7</td><td>WF · Fall onto the Caged Island</td><td><button class="time-link" data-seek="17218">9:33.93 ↗</button></td></tr>
+        <tr><td>8</td><td>WF · Shoot into the Wild Blue</td><td><button class="time-link" data-seek="19113">10:37.10 ↗</button></td></tr>
+        <tr class="key-row"><td>Key</td><td>First Bowser · Basement key</td><td><button class="time-link" data-seek="26540">14:44.67 ↗</button></td></tr>
+      </tbody></table></div>
+      <p class="figure-caption">Times start at the first API observation and use 30 physics frames/s. The intro and startup warmup are excluded. BOB: Bob-omb Battlefield. WF: Whomp’s Fortress.</p>
+      <p>The run records zero deaths and a minimum health of 5/8. A second campaign with decision logging matches the initial observation and all 26,600 recorded actions and observations, including the 60-frame tail after success. These matching runs establish repeatability for this setup; robustness to varied starts and disturbances remains unmeasured.</p>
+      <details class="evidence-details"><summary>Run configuration and verification</summary><dl><div><dt>Environment</dt><dd>Native PC port · progression mode · oracle ABI 3</dd></div><div><dt>Policy</dt><dd>first-bowser · one decision per physics frame</dd></div><div><dt>Recording</dt><dd>480 × 270 · 8,868 images · every three frames plus endpoints</dd></div><div><dt>Original episode wall time</dt><dd>142.05 seconds, including startup and recording</dd></div><div><dt>Validation</dt><dd>Eight unique saved star bits + first-key flag</dd></div></dl><p>Wall time measures execution, not agent development. <a href="evidence.json">Download the selected run metrics</a>. <a href="evidence.md">Read the full evidence notes</a>.</p></details>
+    </section>
+
+    <section class="section prose"><h2>From oracle state to perception</h2>
+      <p>This experiment separates control from perception. The current policy uses exact state, object behavior IDs, saved progress, and source-informed landmarks. It completes one route through the first Bowser; the later game remains unsolved.</p>
+      <p>Next, we plan to test the fixed policy under timing and state perturbations, extend the skill library, and train a recurrent state estimator from frames and action history. Oracle traces provide supervision. At deployment, the estimator will use its own history, and the policy will need to tolerate uncertainty and accumulated error.</p>
+    </section>
+
+    <section id="related" class="section prose"><h2>Related work</h2>
+      <p><a href="https://code-as-policies.github.io/">Code as Policies</a> uses language models to write programs that combine perception and control. <a href="https://voyager.minedojo.org/">Voyager</a> develops reusable code skills through feedback in Minecraft. Our experiment applies these ideas to a fixed, human-directed SM64 objective.</p>
+      <p><a href="https://proceedings.mlr.press/v80/verma18a.html">Programmatically Interpretable Reinforcement Learning</a> studies readable program policies through a different synthesis procedure. <a href="https://eureka-research.github.io/">Eureka</a> generates reward code for RL; here, code specifies the action policy directly.</p>
+      <h3>Acknowledgments</h3><p>The environment builds on <a href="https://github.com/Gumbo64/sm64-AI">Gumbo64/sm64-AI</a> and its native-port contributors. The interactive state view uses <a href="viewer/vendor/LICENSE">Three.js</a>.</p>
+    </section>
+  </main>
+  <footer class="footer"><div class="prose"><p>SM64 Policy Lab · September 2026</p><p>Website adapted from the <a href="https://nerfies.github.io/">Nerfies</a> project-page template, also used by <a href="https://eureka-research.github.io/">Eureka</a>. The adapted website design is <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. <a href="LICENSE.md">Credits and scope</a>.</p><p class="muted">Super Mario 64 and its game imagery belong to Nintendo. This is an independent research project.</p></div></footer>
+</body>
+</html>

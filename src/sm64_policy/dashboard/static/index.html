@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SM64 · Policy Lab</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Policy Lab home"
+        ><span class="mark">M</span>SM64 <span class="muted">/</span> POLICY
+        LAB</a
+      ><span class="local"><i></i> LOCAL ROLLOUTS</span>
+    </header>
+    <div class="workspace">
+      <aside>
+        <div class="section-label">EXPERIMENT</div>
+        <label class="sr-only" for="run">Choose experiment</label
+        ><select id="run"></select>
+        <div class="run-meta" id="run-meta">Loading experiments…</div>
+        <div class="aside-heading">
+          <span class="section-label">POLICY SESSIONS</span
+          ><button id="refresh" class="quiet" title="Reload artifacts">
+            ↻ Refresh
+          </button>
+        </div>
+        <div id="sessions" class="session-list"></div>
+        <div class="aside-footer">
+          Saved inputs. Recorded state.<br />Every run is an inspectable
+          experiment.
+        </div>
+      </aside>
+      <main>
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">ROLLOUT EXPLORER</div>
+            <h1 id="title">Inspect a policy in motion.</h1>
+            <p id="subtitle">
+              Select a session to follow Mario’s decisions through the world.
+            </p>
+          </div>
+          <span class="badge" id="status">READY</span>
+        </div>
+        <div id="notice" class="notice" hidden></div>
+        <section
+          id="task-panel"
+          class="task-panel"
+          aria-label="Star objective"
+          hidden
+        >
+          <div class="task-heading">
+            <div>
+              <span class="section-label">OBJECTIVE</span>
+              <strong id="objective"></strong>
+            </div>
+            <span id="task-result" class="badge"></span>
+          </div>
+          <p id="skill"></p>
+          <div
+            id="events"
+            class="event-list"
+            aria-label="Jump to rollout event"
+          ></div>
+        </section>
+        <div class="metrics" id="metrics">
+          <div>
+            <span>EXPLORATION</span><strong id="coverage">—</strong
+            ><small>visited map cells</small>
+          </div>
+          <div>
+            <span>DISPLACEMENT</span><strong id="distance">—</strong
+            ><small>max world units</small>
+          </div>
+          <div>
+            <span>THROUGHPUT</span><strong id="throughput">—</strong
+            ><small>simulated frames / sec</small>
+          </div>
+          <div>
+            <span>PROGRESS</span><strong id="stars">—</strong
+            ><small>stars collected</small>
+          </div>
+        </div>
+        <section class="playback" aria-label="Rollout playback">
+          <div class="panel-heading">
+            <span><i class="orange-dot"></i> GAME VIEW</span
+            ><span id="visual-mode">NO SESSION</span>
+          </div>
+          <div id="decision-preview" class="decision-preview">
+            Choose a decision to inspect its input, action and outcome.
+          </div>
+          <div class="view-grid">
+            <div class="game-screen">
+              <img id="game-frame" alt="Recorded Super Mario 64 frame" hidden />
+              <div id="frame-empty">
+                <span class="empty-icon">↗</span
+                ><strong>Follow the rollout</strong>
+                <p>
+                  Recorded frames appear here.<br />Every session includes its
+                  trajectory and controller inputs.
+                </p>
+              </div>
+              <span class="frame-label" id="frame-label">FRAME 00000</span>
+            </div>
+            <section
+              class="state-panel"
+              id="state-panel"
+              aria-label="Interactive oracle state"
+            >
+              <div class="panel-heading">
+                <span>3D ORACLE STATE</span
+                ><button id="expand-state" class="quiet">Expand</button>
+              </div>
+              <div class="scene-toolbar" aria-label="State camera controls">
+                <button data-view="follow" aria-pressed="true">
+                  Follow Mario
+                </button>
+                <button data-view="orbit" aria-pressed="false">Orbit</button>
+                <button data-view="top" aria-pressed="false">Top down</button>
+                <button data-view="camera" aria-pressed="false">
+                  Game camera
+                </button>
+                <label
+                  >Show
+                  <select id="state-basis">
+                    <option value="output">Outcome</option>
+                    <option value="input">Policy input</option>
+                  </select></label
+                >
+              </div>
+              <div class="scene-viewport">
+                <canvas
+                  id="oracle-canvas"
+                  tabindex="0"
+                  aria-label="Interactive 3D state. Drag to orbit, scroll to zoom, right drag to pan; click an object to inspect. Arrow keys rotate the view."
+                ></canvas>
+                <div id="scene-labels" aria-hidden="true"></div>
+                <div id="contact-badge" class="contact-badge"></div>
+              </div>
+              <div class="oracle-status" id="oracle-status" role="status">
+                Select a recorded rollout.
+              </div>
+              <div class="scene-legend">
+                <span class="legend-mario">● Mario</span
+                ><span class="legend-velocity">→ Velocity × 6 frames</span
+                ><span class="legend-target">◇ Policy target</span
+                ><span>White → facing</span>
+              </div>
+              <fieldset class="layers">
+                <legend>Visible layers</legend>
+                <label
+                  ><input type="checkbox" data-layer="geometry" checked />
+                  Surfaces</label
+                >
+                <label
+                  ><input type="checkbox" data-layer="objects" checked />
+                  Objects</label
+                >
+                <label
+                  ><input type="checkbox" data-layer="hitboxes" />
+                  Hitboxes</label
+                >
+                <label><input type="checkbox" data-layer="rays" /> Rays</label>
+                <label
+                  ><input type="checkbox" data-layer="camera" /> Camera</label
+                >
+                <label
+                  ><input type="checkbox" data-layer="intent" checked />
+                  Intent</label
+                >
+                <label
+                  ><input type="checkbox" data-layer="trail" checked />
+                  Trail</label
+                >
+                <label
+                  ><input type="checkbox" data-layer="ghost" checked /> Input
+                  ghost</label
+                >
+                <label
+                  ><input type="checkbox" data-layer="grid" checked /> Ruler
+                  grid</label
+                >
+              </fieldset>
+              <p class="oracle-note" id="oracle-coverage">
+                Unobserved space remains unknown.
+              </p>
+              <p class="oracle-note">
+                Drag to orbit · wheel to zoom · right drag to pan. Shapes are
+                proxies; hitboxes use recorded dimensions. Camera frustum is
+                approximate. XZ routes are drawn at the input height, not
+                inferred floor height.
+              </p>
+            </section>
+          </div>
+          <div class="transport">
+            <button id="play" class="play" aria-label="Play rollout" disabled>
+              ▶</button
+            ><button
+              id="previous"
+              class="step"
+              aria-label="Previous decision"
+              disabled
+            >
+              ‹</button
+            ><button id="next" class="step" aria-label="Next decision" disabled>
+              ›</button
+            ><span id="time" class="time">0:00 / 0:00</span
+            ><label class="sr-only" for="timeline">Rollout timeline</label
+            ><input
+              id="timeline"
+              type="range"
+              min="0"
+              max="0"
+              value="0"
+              disabled
+            /><label class="sr-only" for="speed">Playback speed</label
+            ><select id="speed">
+              <option value="0.5">0.5×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+              <option value="8">8×</option>
+            </select>
+          </div>
+        </section>
+        <section class="decision-panel" aria-label="Policy decision debugger">
+          <div class="panel-heading">
+            <span>STATE → POLICY → ACTION → OUTCOME</span
+            ><span id="decision-caption">Choose a decision</span>
+          </div>
+          <div class="debug-event-row">
+            <label for="debug-event-kind">Jump to</label
+            ><select id="debug-event-kind">
+              <option value="all">All debug events</option>
+              <option value="skill">Skill transitions</option>
+              <option value="damage">Health loss</option>
+              <option value="interaction">Grab / release</option>
+              <option value="landing">Airborne action ends</option></select
+            ><label class="sr-only" for="debug-event">Debug event</label
+            ><select id="debug-event">
+              <option>No events</option></select
+            ><button id="jump-debug-event" class="quiet">Go</button
+            ><button id="align-image" class="quiet">
+              Align to recorded image
+            </button>
+          </div>
+          <div class="decision-flow">
+            <article>
+              <h3><span>01</span> Input observation</h3>
+              <dl id="input-facts"></dl>
+            </article>
+            <article>
+              <h3><span>02</span> Policy intent</h3>
+              <dl id="policy-facts"></dl>
+            </article>
+            <article>
+              <h3><span>03</span> Chosen action</h3>
+              <dl id="action-facts"></dl>
+            </article>
+            <article>
+              <h3><span>04</span> Observed outcome</h3>
+              <dl id="outcome-facts"></dl>
+            </article>
+          </div>
+          <div class="debug-inspection">
+            <section>
+              <h3>Evaluated controllers &amp; conditions</h3>
+              <p class="oracle-note">
+                Recorded during the decision, before the engine step. These are
+                calculations and branch conditions, not generated reasoning.
+              </p>
+              <div id="decision-gates"></div>
+              <div id="control-calls"></div>
+              <details>
+                <summary>Raw recorded policy diagnostics</summary>
+                <pre id="diagnostic-json"></pre>
+              </details>
+            </section>
+            <section>
+              <h3>Inspect an observed object</h3>
+              <div class="object-picker-row">
+                <label class="sr-only" for="object-picker"
+                  >Observed object</label
+                ><select id="object-picker">
+                  <option>Mario</option></select
+                ><button id="focus-object" class="quiet">Focus</button>
+              </div>
+              <div id="object-inspector">
+                Click a shape in the 3D view or choose an object.
+              </div>
+            </section>
+          </div>
+        </section>
+        <details class="trajectory-overview">
+          <summary>Trajectory overview · all visited levels</summary>
+          <div class="map-panel">
+            <div class="map-heading">WORLD TRAJECTORY <span>X / Z</span></div>
+            <canvas
+              id="map"
+              width="560"
+              height="410"
+              aria-label="Mario's path through the level"
+            ></canvas>
+            <div class="map-legend">
+              <span><i class="start-dot"></i> Start</span
+              ><span><i class="orange-dot"></i> Mario</span
+              ><span>400-unit cells</span>
+            </div>
+          </div>
+        </details>
+        <div class="detail-grid">
+          <section class="detail">
+            <div class="panel-heading">
+              CONTROLLER <span id="decision">DECISION —</span>
+            </div>
+            <div class="controller">
+              <canvas
+                id="stick"
+                width="110"
+                height="110"
+                aria-label="Analog stick position"
+              ></canvas>
+              <div>
+                <div class="buttons">
+                  <span id="button-a">A</span><span id="button-b">B</span
+                  ><span id="button-z">Z</span><span id="button-start">Start</span>
+                </div>
+                <p id="stick-value">X 0 · Y 0</p>
+              </div>
+            </div>
+          </section>
+          <section class="detail">
+            <div class="panel-heading">
+              STATE TELEMETRY <span id="level">LEVEL —</span>
+            </div>
+            <dl class="telemetry">
+              <div>
+                <dt>Position X / Y / Z</dt>
+                <dd id="position">—</dd>
+              </div>
+              <div>
+                <dt>Velocity X / Y / Z</dt>
+                <dd id="velocity">—</dd>
+              </div>
+              <div>
+                <dt>Health / Coins</dt>
+                <dd id="health">—</dd>
+              </div>
+              <div>
+                <dt>Mario action</dt>
+                <dd id="action">—</dd>
+              </div>
+            </dl>
+          </section>
+          <section class="detail">
+            <div class="panel-heading">
+              VERTICAL PROFILE <span>HEIGHT</span>
+            </div>
+            <canvas
+              id="height-chart"
+              width="450"
+              height="125"
+              aria-label="Mario's height over the rollout"
+            ></canvas>
+            <p class="chart-note">
+              Scrub the timeline to inspect each decision.
+            </p>
+          </section>
+        </div>
+        <footer>
+          <span id="footnote"
+            >Game completion is not measured. Exploration is a diagnostic, not a
+            win condition.</span
+          ><span>SPACE play / pause · ← → step</span>
+        </footer>
+      </main>
+    </div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

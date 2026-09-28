@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sm64-code-policy"
+version = "0.1.0"
+description = "Process-isolated code policy experiments for Gumbo64/sm64-AI"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["ruff==0.16.9"]
+
+[project.scripts]
+sm64-policy = "sm64_policy.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["sm64_policy*"]
+
+[tool.setuptools.package-data]
+sm64_policy = ["dashboard/static/*", "dashboard/static/vendor/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
