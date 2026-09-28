@@ -1023,9 +1023,9 @@ else
     ifeq ($(OSX_BUILD),1)
       LDFLAGS += -Llib/bass -lbass -lbass_fx -Wl,-rpath,@loader_path
     else ifeq ($(TARGET_RPI),1)
-      LDFLAGS += -lbass -lbass_fx -Wl,-rpath . -Wl,-rpath lib/bass/arm
+      LDFLAGS += -lbass -lbass_fx -Wl,-rpath,'$$ORIGIN'
     else
-      LDFLAGS += -lbass -lbass_fx -Wl,-rpath . -Wl,-rpath lib/bass
+      LDFLAGS += -lbass -lbass_fx -Wl,-rpath,'$$ORIGIN'
     endif
   endif
 endif
