@@ -12,6 +12,55 @@ from sm64_policy.tasks import CampaignGoal, CampaignTask
 
 
 class CampaignTests(unittest.TestCase):
+    def test_tower_alignment_does_not_stall_in_controller_dead_zone(self):
+        from types import SimpleNamespace
+
+        from sm64_policy.campaign.tower import Tower
+        from sm64_policy.control import steer
+
+        # Linux failure: waiting to jump from the diagonal platform to the
+        # north platform, while the original -5 lateral input is discarded.
+        s = replace(
+            observation(level=24, frame=36000),
+            position=(264.0, 4185.0, -527.193115234375),
+            mario=SimpleNamespace(
+                face_angle=(0, -24576, 0), airborne=False, platform_id=11438, floor=None
+            ),
+            ui=SimpleNamespace(dialog_id=-1),
+            objects=SimpleNamespace(
+                items=(
+                    SimpleNamespace(
+                        id=18607,
+                        behavior_name="bhvWfSolidTowerPlatform",
+                        position=(0.0, 4183.0, -704.0),
+                        velocity=(0.0, 0.0, 0.0),
+                    ),
+                )
+            ),
+        )
+        self.assertEqual(steer(s, (0, -704), 24).stick_x, -5)
+        tower = Tower()
+        tower.index = 4
+        action = tower.act(s)
+        self.assertLessEqual(action.stick_x, -8)
+        self.assertFalse(action.a)  # Align before jumping, rather than bypassing the gate.
+
+    def test_alignment_turns_both_directions_without_changing_forward_input(self):
+        from types import SimpleNamespace
+
+        from sm64_policy.control import steer
+
+        s = observation(mario=SimpleNamespace(face_angle=(0, 0, 0)))
+        for x in (-20, 20):
+            with self.subTest(x=x):
+                walking = steer(s, (x, 100), 24)
+                aligning = steer(s, (x, 100), 24, ensure_turn=True)
+                self.assertLess(abs(walking.stick_x), 8)
+                self.assertGreaterEqual(abs(aligning.stick_x), 8)
+                self.assertLess(aligning.stick_x * x, 0)
+                self.assertEqual(aligning.stick_y, walking.stick_y)
+        self.assertEqual(steer(s, (0, 100), 24, ensure_turn=True).stick_x, 0)
+
     def test_eight_unique_bits_and_key_are_both_required(self):
         initial = observation(level=16)
         task = CampaignTask(CampaignGoal(), initial)

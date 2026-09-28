@@ -17,20 +17,38 @@ def horizontal_distance(state: Observation, target: tuple[float, float]) -> floa
     return math.hypot(target[0] - state.position[0], target[1] - state.position[2])
 
 
-def steer(state: Observation, target: tuple[float, float], magnitude: int = 64) -> Action:
-    """Face and walk toward an XZ target; caller handles stopping and obstacles."""
+def steer(
+    state: Observation,
+    target: tuple[float, float],
+    magnitude: int = 64,
+    *,
+    ensure_turn: bool = False,
+) -> Action:
+    """Face and walk toward an XZ target; caller handles stopping and obstacles.
+
+    Use ensure_turn for slow heading-alignment gates: nonzero lateral commands
+    must survive the native raw-stick dead zone. Ordinary walking retains its
+    existing response, including small inputs that the engine ignores.
+    """
     if state.mario is None:
         raise ValueError("Feedback control requires an oracle Mario state")
     dx, dz = target[0] - state.position[0], target[1] - state.position[2]
     yaw = state.mario.face_angle[1] * math.tau / 65536
     error = (math.atan2(dx, dz) - yaw + math.pi) % math.tau - math.pi
-    action = Action(round(-magnitude * math.sin(error)), round(magnitude * math.cos(error)))
+    stick_x = round(-magnitude * math.sin(error))
+    # Alignment gates must keep turning until their angular tolerance is met.
+    # adjust_analog_stick ignores raw axes in [-7, 7], so a slow diagonal
+    # command can otherwise walk straight forever just outside that tolerance.
+    if ensure_turn and 0 < abs(stick_x) < 8:
+        stick_x = 8 if stick_x > 0 else -8
+    action = Action(stick_x, round(magnitude * math.cos(error)))
     record_control(
         "steer",
         target_xz=target,
         distance=math.hypot(dx, dz),
         heading_error_degrees=math.degrees(error),
         magnitude=magnitude,
+        ensure_turn=ensure_turn,
         action=action.to_dict(),
     )
     return action

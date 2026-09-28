@@ -75,3 +75,7 @@ mode, resolution, recording cadence, and workers. Run reference and candidate
 suites sequentially. Check actions and observations with
 `scripts/compare_rollouts.py`; faster execution alone does not establish preserved
 behavior. Scene traversal and animation callbacks have gameplay side effects.
+
+The initial Linux eight-star campaign failure is fixed; see
+[Linux compatibility](LINUX_COMPATIBILITY.md) for the controller dead-zone bug
+and fresh-save campaign validation on both hosts.

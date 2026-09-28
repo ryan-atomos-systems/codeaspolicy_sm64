@@ -84,7 +84,12 @@ class Tower:
             away = math.atan2(s.position[0] - t[0], s.position[2] - t[1])
             yaw = s.mario.face_angle[1] * math.tau / 65536
             if abs((away - yaw + math.pi) % math.tau - math.pi) > 0.15:
-                return steer(s, (2 * s.position[0] - t[0], 2 * s.position[2] - t[1]), 24)
+                return steer(
+                    s,
+                    (2 * s.position[0] - t[0], 2 * s.position[2] - t[1]),
+                    24,
+                    ensure_turn=True,
+                )
             return Action(z=True, a=s.mario.action in (0x0C008220, 0x0C008221))
         if self.index == 0 and self.stage < 2:
             angle = math.atan2(s.position[0], s.position[2])
@@ -115,7 +120,7 @@ class Tower:
             math.atan2(t[0] - s.position[0], t[1] - s.position[2]) - yaw + math.pi
         ) % math.tau - math.pi
         if abs(err) > 0.18:
-            return steer(s, t, 24)
+            return steer(s, t, 24, ensure_turn=True)
         if s.frame - self.last_jump > 6:
             self.last_jump = s.frame
             return replace(a, a=True)
